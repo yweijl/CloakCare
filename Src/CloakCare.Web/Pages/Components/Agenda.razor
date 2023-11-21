@@ -1,0 +1,72 @@
+@using System.Net.Http.Json
+@using CloakCare.Web.Data
+@using MudBlazor
+@* @inject HttpClient httpClient *@
+@inject ISnackbar Snackbar
+
+<div Class="pt-5">
+    <MudTable Items="@_appointments" Dense="false" Hover="true" ReadOnly="false" CanCancelEdit="true" Filter="new Func<Appointment, bool>(FilterFunc)"
+              @bind-SelectedItem="_selectedItem" SortLabel="Sort By" CommitEditTooltip="Commit Edit"
+              OnCommitEditClick="@(() => Snackbar.Add("Afspraak gewijzigd"))" RowEditPreview="BackupItem" RowEditCancel="ResetItemToOriginalValues"
+              RowEditCommit="ItemHasBeenCommitted" IsEditRowSwitchingBlocked="true" ApplyButtonPosition="TableApplyButtonPosition.End" EditButtonPosition="TableEditButtonPosition.End" EditTrigger="TableEditTrigger.EditButton">
+        <ToolBarContent>
+            <MudText Typo="Typo.h6">Agenda</MudText>
+            <MudButton Class="ml-5" Variant="Variant.Filled" Size="Size.Small" EndIcon="@Icons.Material.Filled.Add" Color="Color.Primary" OnClick="@(AddAppointment)">Nieuw</MudButton>
+            <MudSpacer/>
+            <MudTextField @bind-Value="_searchString" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+        </ToolBarContent>
+        <ColGroup>
+            <col style="width: 180px"/>
+            <col/>
+            <col/>
+            <col/>
+            <col/>
+            <col/>
+        </ColGroup>
+        <HeaderContent>
+            <MudTh>
+                <MudTableSortLabel InitialDirection="SortDirection.Ascending" SortBy="new Func<Appointment, object>(x => x.DateTime)">Datum</MudTableSortLabel>
+            </MudTh>
+            <MudTh>
+                <MudTableSortLabel SortBy="new Func<Appointment, object>(x => x.Name)">Afspraak</MudTableSortLabel>
+            </MudTh>
+            <MudTh>
+                <MudTableSortLabel SortBy="new Func<Appointment, object>(x => x.Location)">Locatie</MudTableSortLabel>
+            </MudTh>
+            <MudTh>
+                <MudTableSortLabel SortBy="new Func<Appointment, object>(x => x.Companion)">Begeleider</MudTableSortLabel>
+            </MudTh>
+            <MudTh></MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd DataLabel="Datum">@context.DateTime</MudTd>
+            <MudTd DataLabel="Naam">@context.Name</MudTd>
+            <MudTd DataLabel="Locatie">@context.Location</MudTd>
+            <MudTd DataLabel="Begeleider">@context.Companion</MudTd>
+            <MudTd>
+                <MudIconButton Size="Size.Small" Icon="@Icons.Material.Outlined.Delete" Class="pa-0" OnClick="@(() => RemoveAppointment(context))"/>
+            </MudTd>
+        </RowTemplate>
+        <RowEditingTemplate>
+            <MudTd Class="d-flex flex-wrap" DataLabel="Datum">
+                <MudDatePicker Label="Datum" @bind-Date="_editDate" Editable="true" Required/>
+                <MudTimePicker Label="Tijd" @bind-Time="_editTime" Required/>
+            </MudTd>
+            <MudTd DataLabel="Naam">
+                <MudTextField @bind-Value="@context.Name" Required/>
+            </MudTd>
+            <MudTd DataLabel="Locatie">
+                <MudTextField @bind-Value="@context.Location" Required/>
+            </MudTd>
+            <MudTd DataLabel="Begeleider">
+                <MudTextField @bind-Value="@context.Companion"/>
+            </MudTd>
+        </RowEditingTemplate>
+        <PagerContent>
+            <MudTablePager/>
+        </PagerContent>
+        <EditButtonContent Context="button">
+            <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.Edit" Class="pa-0" OnClick="@button.ButtonAction" Disabled="@button.ButtonDisabled"/>
+        </EditButtonContent>
+    </MudTable>
+</div>

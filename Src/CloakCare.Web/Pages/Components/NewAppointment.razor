@@ -1,0 +1,67 @@
+@using CloakCare.Web.Data
+@using System.ComponentModel.DataAnnotations
+
+<MudDialog Style="min-width: 100px; width: 400px">
+    <DialogContent >
+        <EditForm sm="12" Model="@Model" OnValidSubmit="OnValidSubmit">
+            <DataAnnotationsValidator/>
+            <MudCard Class="mb-5">
+                <MudCardContent>
+                    <MudDatePicker Label="Datum" @bind-Date="Model.Date" Editable="true" For="@(() => Model.Date)"  />
+                    <MudTimePicker Label="Tijd" @bind-Time="Model.Time" Editable="true" For="@(() => Model.Time)" />
+                    <MudTextField Label="Naam" Class="mt-3"
+                                  @bind-Value="Model.Name" For="@(() => Model.Name)" />
+                    <MudTextField Label="Locatie"
+                                  @bind-Value="Model.Location" For="@(() => Model.Location)" />
+                    <MudTextField Label="Begeleider" Class="mt-3"
+                                  @bind-Value="Model.Companion" For="@(() => Model.Companion)"/>
+                </MudCardContent>
+                <MudCardActions Class="d-flex justify-end">
+                    <MudButton OnClick="Cancel">Annuleer</MudButton>
+                    <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" Class="ml-1">Opslaan</MudButton>
+                </MudCardActions>
+            </MudCard>
+        </EditForm>
+    </DialogContent>
+</MudDialog>
+
+
+@code {
+
+    [CascadingParameter]
+    private MudDialogInstance MudDialog { get; set; } = default!;
+
+    private AppointmentForm Model { get; set; } = new();
+
+    private void OnValidSubmit(EditContext context)
+    {
+            MudDialog.Close(DialogResult.Ok(Model.ToAppointment()));
+    }
+
+
+    void Cancel() => MudDialog.Cancel();
+    
+    private class AppointmentForm
+    {
+        [Required(ErrorMessage = "Geef een datum op")]
+        public DateTime? Date { get; set; }
+        [Required(ErrorMessage = "Geef een tijd op")]
+        public TimeSpan? Time { get; set; }
+        [Required(ErrorMessage = "Vul een naam in")]
+        public string? Name { get; set; }
+        [Required(ErrorMessage = "Geef een locatie op")]
+        public string? Location { get; set; }
+        public string? Companion { get; set; }
+
+        public Appointment ToAppointment()
+        {
+            return new Appointment()
+            {
+                DateTime = Date!.Value.Add(Time!.Value),
+                Name = Name!,
+                Location = Location!,
+                Companion = Companion!,
+            };
+        }
+    }
+}

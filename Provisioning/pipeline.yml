@@ -1,0 +1,76 @@
+trigger:
+  branches:
+    include:
+      - "*"
+
+pool: Default
+
+variables:
+  - group: PipeLib
+  - template: vars.yml
+  - name: isMain
+    value: $[eq(variables['Build.SourceBranch'], 'refs/heads/main')]
+  - name: runProvision
+    value: true
+
+stages:
+  - stage: "Dev"
+    displayName: "Dev"
+    jobs:
+      - job: "Build"
+        displayName: "Build"
+        steps:
+          - task: DotNetCoreCLI@2
+            displayName: "Build app"
+            inputs:
+              command: "publish"
+              publishWebProjects: true
+              arguments: "--configuration Release"
+      - job: "Provision"
+        condition: and(eq(variables['isMain'], true), eq(variables['runProvision'], true))
+        displayName: "Provision"
+        variables:
+          - name: templateFile
+            value: "Provisioning/Bicep/main.bicep"
+          - name: paramFile
+            value: Provisioning/Bicep/parameters.bicepparam
+        steps:
+          - task: AzureCLI@2
+            name: "Bicep"
+            inputs:
+              azureSubscription: $(azureServiceConnection)
+              scriptType: bash
+              scriptLocation: inlineScript
+              useGlobalConfig: true
+              inlineScript: |
+                az --version
+                az group create --name ${{variables.name}}-rg --location $(location)
+                az stack group create \
+                  --name ${{variables.name}}-stack \
+                  --resource-group ${{variables.name}}-rg \
+                  --template-file $(templateFile) \
+                  --parameters $(paramFile) \
+                  --deny-settings-mode none \
+                  --delete-resources \
+                  --delete-resource-groups
+      - deployment: Deploy
+        environment: Dev
+        dependsOn:
+          - Build
+          - Provision
+        condition: or(
+          and(succeeded('Build'), succeeded('Provision'), variables['isMain'], true),
+          and(succeeded('Build'), eq(variables['runProvision'], false), variables['isMain'], true)
+          )
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - task: AzureWebApp@1
+                  displayName: "Deploy app"
+                  inputs:
+                    azureSubscription: $(azureServiceConnection)
+                    appType: "webAppLinux"
+                    appName: "${{variables.name}}-as"
+                    package: "$(System.DefaultWorkingDirectory)/**/*.zip"
+                    runtimeStack: "DOTNETCORE|7.0"
