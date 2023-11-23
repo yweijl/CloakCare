@@ -5,6 +5,7 @@ param tags object = {}
 
 param aspKind string
 param aspSku string
+param containerName string
 
 var resourceGroup = az.resourceGroup('${name}-rg')
 
@@ -28,6 +29,17 @@ module appService 'Modules/appService.bicep' = {
     location: location
     serverFarmId: appServicePlan.outputs.id
     tags: tags
+  }
+}
+
+module cosmosDb 'Modules/cosmos.bicep' = {
+  scope: resourceGroup
+  name: '${name}-db'
+  params: {
+    accountName: '${name}-db-account'
+    containerName: containerName
+    dbName: '${name}-db'
+    location: location
   }
 }
 

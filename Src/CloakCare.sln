@@ -2,8 +2,6 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Src", "Src", "{EC317C59-5CF7-44D6-9A59-EF9083D4F3BE}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Provisioning", "Provisioning", "{D6678157-67C3-47D6-AE19-BB72D8E28557}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CloakCare.Web", "CloakCare.Web\CloakCare.Web.csproj", "{461612F7-9586-4432-843C-DE249202C330}"
 EndProject
 Global
