@@ -3,6 +3,8 @@ param name string
 param location string
 param tags object = {}
 
+param environment string
+
 param aspKind string
 param aspSku string
 param containerName string
@@ -29,6 +31,24 @@ module appService 'Modules/appService.bicep' = {
     location: location
     serverFarmId: appServicePlan.outputs.id
     tags: tags
+    appsettings: [
+      {
+        name: 'ASPNETCORE_ENVIRONMENT'
+        value: environment
+      }
+      {
+        name: 'CosmosSettings__DbName'
+        value: '${name}-db'
+      }
+      {
+        name: 'CosmosSettings__Endpoint'
+        value: 'https://${name}-db.documents.azure.com:443/'
+      }
+      {
+        name: 'CosmosSettings__Container'
+        value: containerName
+      }
+    ]
   }
 }
 
@@ -36,11 +56,9 @@ module cosmosDb 'Modules/cosmos.bicep' = {
   scope: resourceGroup
   name: '${name}-db'
   params: {
-    accountName: '${name}-db-account'
-    containerName: containerName
     dbName: '${name}-db'
+    containerName: containerName
     location: location
+    appPrincipalId: appService.outputs.appPrincipalId
   }
 }
-
-output appName string = appService.name

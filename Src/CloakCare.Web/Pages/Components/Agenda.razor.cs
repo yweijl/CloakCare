@@ -9,6 +9,9 @@ public partial class Agenda : ComponentBase
 {
     [Inject]
     private IDialogService DialogService { get; set; } = default!;
+
+    [Inject] 
+    private DataService DataService { get; set; } = default!;
     
     private List<string> _editEvents = new();
     private string _searchString = "";
@@ -18,19 +21,9 @@ public partial class Agenda : ComponentBase
     private TimeSpan? _editTime;
     private DateTime? _editDate;
 
-
     protected override async Task OnInitializedAsync()
     {
-        // Elements = await httpClient.GetFromJsonAsync<List<Element>>("webapi/periodictable");
-        for (var i = 0; i < 100; i++)
-        {
-            _appointments.Add(new Appointment()
-            {
-                DateTime = DateTime.Now.AddDays(i),
-                Name = $"Doctor {i}",
-                Location = $"Location {i}",
-            });
-        }
+        _appointments = (await DataService.GetAppointmentsAsync()).ToList();
     }
 
     private async Task RemoveAppointment(Appointment appointment)

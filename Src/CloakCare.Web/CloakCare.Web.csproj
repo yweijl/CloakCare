@@ -1,12 +1,15 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
     <PropertyGroup>
         <TargetFramework>net7.0</TargetFramework>
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
-    </PropertyGroup>
+      <UserSecretsId>fbb14b23-0191-4456-bccf-be2edc146f22</UserSecretsId>
+  </PropertyGroup>
 
     <ItemGroup>
+      <PackageReference Include="Azure.Identity" Version="1.10.4" />
+      <PackageReference Include="Microsoft.Azure.Cosmos" Version="3.37.0" />
       <PackageReference Include="MudBlazor" Version="6.11.0" />
     </ItemGroup>
 

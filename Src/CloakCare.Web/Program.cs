@@ -10,6 +10,11 @@ builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 builder.Services.AddMudServices();
 
+builder.Services.AddScoped<DataService>();
+
+builder.Services.Configure<CosmosSettings>(
+    builder.Configuration.GetSection(nameof(CosmosSettings)));
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
