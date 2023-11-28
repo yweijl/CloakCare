@@ -9,18 +9,16 @@ namespace CloakCare.Web.Pages.Components;
 public partial class Agenda : ComponentBase, IDisposable
 {
     private CancellationTokenSource? _cts;
-    
-    [Inject]
-    private IDialogService DialogService { get; set; } = default!;
 
-    [Inject] 
-    private DataService DataService { get; set; } = default!;
-    
+    [Inject] private IDialogService DialogService { get; set; } = default!;
+
+    [Inject] private DataService DataService { get; set; } = default!;
+
     private List<string> _editEvents = new();
     private string _searchString = "";
     private Appointment _selectedItem = null!;
     private Appointment _appointmentBeforeEdit = default!;
-    private List<Appointment> _appointments = new ();
+    private List<Appointment> _appointments = new();
     private TimeSpan? _editTime;
     private DateTime? _editDate;
     private bool _loading;
@@ -35,11 +33,24 @@ public partial class Agenda : ComponentBase, IDisposable
 
     private async Task RemoveAppointment(Appointment appointment)
     {
-            await DataService.RemoveAppointmentAsync(appointment);
-            // _appointments.Remove(appointment);
-            StateHasChanged();
+        var toDelete = await DialogService.ShowMessageBox(
+            "Afspraak verwijderen", 
+            "Weet je zeker dat je de afspraak wilt verwijderen?", 
+            yesText:"Ja", cancelText:"Nee");
+
+        if (!toDelete ?? true)
+        {
+            return;
+        }
+        
+        _loading = true;
+        await DataService.RemoveAppointmentAsync(appointment);
+        _appointments.Remove(appointment);
+        StateHasChanged();
+        _loading = false;
+        Snackbar.Add("Afspraak verwijderd", Severity.Info);
     }
-    
+
     private async Task AddAppointment()
     {
         var options = new DialogOptions { CloseOnEscapeKey = true };
@@ -49,14 +60,10 @@ public partial class Agenda : ComponentBase, IDisposable
         if (!result.Canceled)
         {
             await DataService.AddAppointmentAsync((Appointment)result.Data);
-            // _appointments.Add((Appointment)result.Data);
+            _appointments.Add((Appointment)result.Data);
             StateHasChanged();
+            Snackbar.Add("Afspraak opgeslagen", Severity.Info);
         }
-    }
-
-    private async Task EditAppointment()
-    {
-        
     }
 
     private void ClearEventLog()
@@ -74,20 +81,24 @@ public partial class Agenda : ComponentBase, IDisposable
     {
         _editDate = ((Appointment)appointment).DateTime;
         _editTime = ((Appointment)appointment).DateTime.TimeOfDay;
-        
+
         _appointmentBeforeEdit = new Appointment
         {
-                DateTime = ((Appointment)appointment).DateTime,
-                Name = ((Appointment)appointment).Name,
-                Location = ((Appointment)appointment).Location
-            };
-        AddEditionEvent($"RowEditPreview event: made a backup of Appointment {((Appointment)appointment).Name}");
+            DateTime = ((Appointment)appointment).DateTime,
+            Name = ((Appointment)appointment).Name,
+            Location = ((Appointment)appointment).Location
+        };
+        AddEditionEvent(
+            $"RowEditPreview event: made a backup of Appointment {((Appointment)appointment).Name}");
     }
 
-    private void ItemHasBeenCommitted(object appointment)
+    private async void RowEditCommitted(object appointment)
     {
+        _loading = true;
         ((Appointment)appointment).DateTime = _editDate!.Value.Add(_editTime!.Value);
-        AddEditionEvent($"RowEditCommit event: Changes to Appointment {((Appointment)appointment).Name} committed");
+        await DataService.EditAppointAsync((Appointment)appointment);
+        _loading = false;
+        StateHasChanged();
     }
 
     private void ResetItemToOriginalValues(object appointment)
@@ -103,7 +114,8 @@ public partial class Agenda : ComponentBase, IDisposable
     {
         if (string.IsNullOrWhiteSpace(_searchString))
             return true;
-        if (appointment.DateTime.ToString(CultureInfo.InvariantCulture).Contains(_searchString, StringComparison.OrdinalIgnoreCase))
+        if (appointment.DateTime.ToString(CultureInfo.InvariantCulture)
+            .Contains(_searchString, StringComparison.OrdinalIgnoreCase))
             return true;
         if (appointment.Name.Contains(_searchString, StringComparison.OrdinalIgnoreCase))
             return true;
@@ -111,8 +123,10 @@ public partial class Agenda : ComponentBase, IDisposable
             return true;
         if (appointment.Companion.Contains(_searchString, StringComparison.OrdinalIgnoreCase))
             return true;
-        if ($"{appointment.DateTime} {appointment.Name} {appointment.Location} {appointment.Companion} ".Contains(_searchString))
+        if ($"{appointment.DateTime} {appointment.Name} {appointment.Location} {appointment.Companion} "
+            .Contains(_searchString))
             return true;
+
         return false;
     }
 
@@ -121,4 +135,3 @@ public partial class Agenda : ComponentBase, IDisposable
         _cts?.Dispose();
     }
 }
-    

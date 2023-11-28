@@ -7,8 +7,8 @@
             <DataAnnotationsValidator/>
             <MudCard Class="mb-5">
                 <MudCardContent>
-                    <MudDatePicker Label="Datum" @bind-Date="Model.Date" Editable="true" For="@(() => Model.Date)"  />
-                    <MudTimePicker Label="Tijd" @bind-Time="Model.Time" Editable="true" For="@(() => Model.Time)" />
+                    <MudDatePicker Label="Datum" DisableToolbar="true" @bind-Date="Model.Date" Editable="true" For="@(() => Model.Date)"  />
+                    <MudTimePicker Label="Tijd" DisableToolbar="true" @bind-Time="Model.Time" Editable="true" For="@(() => Model.Time)" />
                     <MudTextField Label="Naam" Class="mt-3"
                                   @bind-Value="Model.Name" For="@(() => Model.Name)" />
                     <MudTextField Label="Locatie"

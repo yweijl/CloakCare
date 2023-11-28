@@ -10,24 +10,29 @@ public class DataService
     private readonly ILogger<DataService> _logger;
     private readonly Container _container;
     private readonly string _patientId;
-    private readonly PartitionKey _partitionKey;
     private Patient? _patient;
 
     public DataService(IOptions<CosmosSettings> settings, ILogger<DataService> logger)
     {
         _logger = logger;
-        var client = new CosmosClient(settings.Value.Endpoint, new DefaultAzureCredential());
+        var client = new CosmosClient(settings.Value.Endpoint, new DefaultAzureCredential(),
+            new CosmosClientOptions()
+            {
+                SerializerOptions = new CosmosSerializationOptions
+                {
+                    PropertyNamingPolicy = CosmosPropertyNamingPolicy.CamelCase,
+                },
+            });
         _container = client.GetDatabase(settings.Value.DbName)
             .GetContainer(settings.Value.Container);
         _patientId = settings.Value.PatientId;
-        _partitionKey = new PartitionKey(_patientId);
     }
 
     public async Task<List<Appointment>> GetAppointmentsAsync(CancellationToken cancellationToken)
     {
         var result =
-            await _container.ReadItemAsync<Patient>(_patientId,
-                _partitionKey, cancellationToken: cancellationToken);
+            await _container.ReadItemAsync<Patient>(_patientId, new PartitionKey(_patientId),
+                cancellationToken: cancellationToken);
 
         _patient = result.Resource;
         return _patient.Appointments;
@@ -56,7 +61,7 @@ public class DataService
     {
         try
         {
-            await _container.ReplaceItemAsync(_patient, _patientId, _partitionKey);
+            await _container.ReplaceItemAsync(_patient, _patientId);
         }
         catch (CosmosException e)
         {

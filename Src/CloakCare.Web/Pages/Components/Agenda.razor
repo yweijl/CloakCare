@@ -5,10 +5,10 @@
 @inject ISnackbar Snackbar
 
 <div Class="pt-5">
-    <MudTable Items="@_appointments" Dense="false" Hover="true" Loading="_loading" ReadOnly="false" CanCancelEdit="true" Filter="new Func<Appointment, bool>(FilterFunc)"
+    <MudTable  Items="@_appointments" Dense="false" Hover="true" Loading="_loading" ReadOnly="false" CanCancelEdit="true" Filter="new Func<Appointment, bool>(FilterFunc)"
               @bind-SelectedItem="_selectedItem" SortLabel="Sort By" CommitEditTooltip="Commit Edit"
-              OnCommitEditClick="@(() => Snackbar.Add("Afspraak gewijzigd"))" RowEditPreview="BackupItem" RowEditCancel="ResetItemToOriginalValues"
-              RowEditCommit="ItemHasBeenCommitted" IsEditRowSwitchingBlocked="true" ApplyButtonPosition="TableApplyButtonPosition.End" EditButtonPosition="TableEditButtonPosition.End" EditTrigger="TableEditTrigger.EditButton">
+              RowEditPreview="BackupItem" RowEditCancel="ResetItemToOriginalValues"
+              RowEditCommit="RowEditCommitted" IsEditRowSwitchingBlocked="true" ApplyButtonPosition="TableApplyButtonPosition.End" EditButtonPosition="TableEditButtonPosition.End" EditTrigger="TableEditTrigger.EditButton">
         <ToolBarContent>
             <MudText Typo="Typo.h6">Agenda</MudText>
             <MudButton Class="ml-5" Variant="Variant.Filled" Size="Size.Small" EndIcon="@Icons.Material.Filled.Add" Color="Color.Primary" OnClick="@(AddAppointment)">Nieuw</MudButton>
@@ -49,8 +49,8 @@
         </RowTemplate>
         <RowEditingTemplate>
             <MudTd Class="d-flex flex-wrap" DataLabel="Datum">
-                <MudDatePicker Label="Datum" @bind-Date="_editDate" Editable="true" Required/>
-                <MudTimePicker Label="Tijd" @bind-Time="_editTime" Required/>
+                <MudDatePicker DisableToolbar="true" Label="Datum" @bind-Date="_editDate" Editable="true" Required/>
+                <MudTimePicker DisableToolbar="true" Label="Tijd" @bind-Time="_editTime" Required/>
             </MudTd>
             <MudTd DataLabel="Afspraak">
                 <MudTextField @bind-Value="@context.Name" Required/>
