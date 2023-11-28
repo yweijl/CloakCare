@@ -49,8 +49,8 @@
         </RowTemplate>
         <RowEditingTemplate>
             <MudTd Class="d-flex flex-wrap" DataLabel="Datum">
-                <MudDatePicker DisableToolbar="true" Label="Datum" @bind-Date="_editDate" Editable="true" Required/>
-                <MudTimePicker DisableToolbar="true" Label="Tijd" @bind-Time="_editTime" Required/>
+                <MudDatePicker @ref="_datePicker" @onfocus="@(() =>SetFocus(true))" DisableToolbar="true" Label="Datum" @bind-Date="_editDate" Editable="true" Required/>
+                <MudTimePicker @ref="_timePicker" @onfocus="@(() =>SetFocus(false))" DisableToolbar="true" Label="Tijd" @bind-Time="_editTime" Required/>
             </MudTd>
             <MudTd DataLabel="Afspraak">
                 <MudTextField @bind-Value="@context.Name" Required/>

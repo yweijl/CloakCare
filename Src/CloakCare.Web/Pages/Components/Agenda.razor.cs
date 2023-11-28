@@ -3,6 +3,7 @@ using CloakCare.Web.Data;
 using CloakCare.Web.Data.Models;
 using Microsoft.AspNetCore.Components;
 using MudBlazor;
+using MudBlazor.Services;
 
 namespace CloakCare.Web.Pages.Components;
 
@@ -14,6 +15,9 @@ public partial class Agenda : ComponentBase, IDisposable
 
     [Inject] private DataService DataService { get; set; } = default!;
 
+    [Inject] private IBrowserViewportService BreakpointListener { get; set; } = default!;
+
+
     private List<string> _editEvents = new();
     private string _searchString = "";
     private Appointment _selectedItem = null!;
@@ -22,13 +26,23 @@ public partial class Agenda : ComponentBase, IDisposable
     private TimeSpan? _editTime;
     private DateTime? _editDate;
     private bool _loading;
+    private Breakpoint _breakPoint;
 
+    private MudDatePicker _datePicker = default!;
+    private MudTimePicker _timePicker = default!;
+    
     protected override async Task OnInitializedAsync()
     {
         _cts = new CancellationTokenSource();
         _loading = true;
         _appointments = (await DataService.GetAppointmentsAsync(_cts.Token)).ToList();
         _loading = false;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        _breakPoint = await BreakpointListener.GetCurrentBreakpointAsync();
+        await base.OnAfterRenderAsync(firstRender);
     }
 
     private async Task RemoveAppointment(Appointment appointment)
@@ -133,5 +147,13 @@ public partial class Agenda : ComponentBase, IDisposable
     public void Dispose()
     {
         _cts?.Dispose();
+    }
+
+    private async Task SetFocus(bool isDatePicker)
+    {
+        if (_breakPoint == Breakpoint.Xs)
+        {
+            await (isDatePicker ? _datePicker.BlurAsync() : _timePicker.BlurAsync());
+        }
     }
 }

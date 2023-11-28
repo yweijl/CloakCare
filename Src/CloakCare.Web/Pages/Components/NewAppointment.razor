@@ -7,8 +7,8 @@
             <DataAnnotationsValidator/>
             <MudCard Class="mb-5">
                 <MudCardContent>
-                    <MudDatePicker Label="Datum" DisableToolbar="true" @bind-Date="Model.Date" Editable="true" For="@(() => Model.Date)"  />
-                    <MudTimePicker Label="Tijd" DisableToolbar="true" @bind-Time="Model.Time" Editable="true" For="@(() => Model.Time)" />
+                    <MudDatePicker @ref="_datePicker" @onfocus="@(() =>SetFocus(true))" Label="Datum" DisableToolbar="true" @bind-Date="Model.Date" Editable="true" For="@(() => Model.Date)"  />
+                    <MudTimePicker @ref="_timePicker" @onfocus="@(() =>SetFocus(false))" Label="Tijd" DisableToolbar="true" @bind-Time="Model.Time" Editable="true" For="@(() => Model.Time)" />
                     <MudTextField Label="Naam" Class="mt-3"
                                   @bind-Value="Model.Name" For="@(() => Model.Name)" />
                     <MudTextField Label="Locatie"
@@ -28,14 +28,34 @@
 
 @code {
 
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        _breakPoint = await BreakpointListener.GetCurrentBreakpointAsync();
+        await base.OnAfterRenderAsync(firstRender);
+    }
+
     [CascadingParameter]
     private MudDialogInstance MudDialog { get; set; } = default!;
+    
+    [Inject] private IBrowserViewportService BreakpointListener { get; set; } = default!;
+    
+    private MudDatePicker _datePicker = default!;
+    private MudTimePicker _timePicker = default!;
+    private Breakpoint _breakPoint;
 
     private AppointmentForm Model { get; set; } = new();
 
     private void OnValidSubmit(EditContext context)
     {
             MudDialog.Close(DialogResult.Ok(Model.ToAppointment()));
+    }
+    
+    private async Task SetFocus(bool isDatePicker)
+    {
+        if (_breakPoint == Breakpoint.Xs)
+        {
+            await (isDatePicker ? _datePicker.BlurAsync() : _timePicker.BlurAsync());
+        }
     }
 
 
