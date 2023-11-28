@@ -1,11 +1,11 @@
 @using System.Net.Http.Json
 @using CloakCare.Web.Data
+@using CloakCare.Web.Data.Models
 @using MudBlazor
-@* @inject HttpClient httpClient *@
 @inject ISnackbar Snackbar
 
 <div Class="pt-5">
-    <MudTable Items="@_appointments" Dense="false" Hover="true" ReadOnly="false" CanCancelEdit="true" Filter="new Func<Appointment, bool>(FilterFunc)"
+    <MudTable Items="@_appointments" Dense="false" Hover="true" Loading="_loading" ReadOnly="false" CanCancelEdit="true" Filter="new Func<Appointment, bool>(FilterFunc)"
               @bind-SelectedItem="_selectedItem" SortLabel="Sort By" CommitEditTooltip="Commit Edit"
               OnCommitEditClick="@(() => Snackbar.Add("Afspraak gewijzigd"))" RowEditPreview="BackupItem" RowEditCancel="ResetItemToOriginalValues"
               RowEditCommit="ItemHasBeenCommitted" IsEditRowSwitchingBlocked="true" ApplyButtonPosition="TableApplyButtonPosition.End" EditButtonPosition="TableEditButtonPosition.End" EditTrigger="TableEditTrigger.EditButton">
@@ -40,7 +40,7 @@
         </HeaderContent>
         <RowTemplate>
             <MudTd DataLabel="Datum">@context.DateTime</MudTd>
-            <MudTd DataLabel="Naam">@context.Name</MudTd>
+            <MudTd DataLabel="Afspraak">@context.Name</MudTd>
             <MudTd DataLabel="Locatie">@context.Location</MudTd>
             <MudTd DataLabel="Begeleider">@context.Companion</MudTd>
             <MudTd>
@@ -52,7 +52,7 @@
                 <MudDatePicker Label="Datum" @bind-Date="_editDate" Editable="true" Required/>
                 <MudTimePicker Label="Tijd" @bind-Time="_editTime" Required/>
             </MudTd>
-            <MudTd DataLabel="Naam">
+            <MudTd DataLabel="Afspraak">
                 <MudTextField @bind-Value="@context.Name" Required/>
             </MudTd>
             <MudTd DataLabel="Locatie">

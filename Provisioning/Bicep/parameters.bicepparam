@@ -8,4 +8,4 @@ param location = 'westeurope'
 param tags = {
   App: 'CloakCare'
 }
-param containerName = 'appointments'
+param containerName = 'patients'
