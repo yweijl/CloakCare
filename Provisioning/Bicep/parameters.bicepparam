@@ -9,3 +9,4 @@ param tags = {
   App: 'CloakCare'
 }
 param containerName = 'patients'
+param patientId = '18f22fa8-fc92-4d5f-85bc-20752fd2fe84'

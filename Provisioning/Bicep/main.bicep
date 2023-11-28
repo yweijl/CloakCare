@@ -8,6 +8,7 @@ param environment string
 param aspKind string
 param aspSku string
 param containerName string
+param patientId string
 
 var resourceGroup = az.resourceGroup('${name}-rg')
 
@@ -47,6 +48,10 @@ module appService 'Modules/appService.bicep' = {
       {
         name: 'CosmosSettings__Container'
         value: containerName
+      }
+      {
+        name: 'CosmosSettings__PatientId'
+        value: patientId
       }
     ]
   }

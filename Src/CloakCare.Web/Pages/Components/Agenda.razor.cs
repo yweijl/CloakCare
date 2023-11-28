@@ -35,9 +35,9 @@ public partial class Agenda : ComponentBase, IDisposable
 
     private async Task RemoveAppointment(Appointment appointment)
     {
-        await DataService.RemoveAppointmentAsync(appointment);
-        // _appointments.Remove(appointment);
-        StateHasChanged();
+            await DataService.RemoveAppointmentAsync(appointment);
+            // _appointments.Remove(appointment);
+            StateHasChanged();
     }
     
     private async Task AddAppointment()
