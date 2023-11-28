@@ -1,5 +1,5 @@
-@using CloakCare.Web.Data
 @using System.ComponentModel.DataAnnotations
+@using CloakCare.Web.Data.Models
 
 <MudDialog Style="min-width: 100px; width: 400px">
     <DialogContent >
@@ -57,6 +57,7 @@
         {
             return new Appointment()
             {
+                Id = Guid.NewGuid(),
                 DateTime = Date!.Value.Add(Time!.Value),
                 Name = Name!,
                 Location = Location!,

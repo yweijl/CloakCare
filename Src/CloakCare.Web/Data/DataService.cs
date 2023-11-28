@@ -1,6 +1,6 @@
 using Azure.Identity;
+using CloakCare.Web.Data.Models;
 using Microsoft.Azure.Cosmos;
-using Microsoft.Azure.Cosmos.Linq;
 using Microsoft.Extensions.Options;
 
 namespace CloakCare.Web.Data;
@@ -8,30 +8,29 @@ namespace CloakCare.Web.Data;
 public class DataService
 {
     private readonly Container _container;
+    private readonly string _patientId;
+    private readonly PartitionKey _partitionKey;
+    private Patient? _patient;
 
     public DataService(IOptions<CosmosSettings> settings)
     {
-       var client = new CosmosClient(settings.Value.Endpoint, new DefaultAzureCredential());
-       _container = client.GetDatabase(settings.Value.DbName).GetContainer(settings.Value.Container);
+        var client = new CosmosClient(settings.Value.Endpoint, new DefaultAzureCredential());
+        _container = client.GetDatabase(settings.Value.DbName)
+            .GetContainer(settings.Value.Container);
+        _patientId = settings.Value.PatientId;
+        _partitionKey = new PartitionKey(_patientId);
     }
 
-    public async Task<IEnumerable<Appointment>> GetAppointmentsAsync()
+    public async Task<List<Appointment>> GetAppointmentsAsync(CancellationToken cancellationToken)
     {
         try
         {
-            var queryable = _container.GetItemLinqQueryable<Appointment>();
-            using var feed = queryable
-                .OrderByDescending(x => x.DateTime)
-                .ToFeedIterator();
+            var result =
+                await _container.ReadItemAsync<Patient>(_patientId,
+                    _partitionKey, cancellationToken: cancellationToken);
 
-            List<Appointment> results = new();
-
-            while (feed.HasMoreResults)
-            {
-                var response = await feed.ReadNextAsync();
-                results.AddRange(response);
-            }
-            return results;
+            _patient = result.Resource;
+            return _patient.Appointments;
 
         }
         catch (CosmosException e)
@@ -40,5 +39,37 @@ public class DataService
             throw;
         }
 
+    }
+
+    public async Task AddAppointmentAsync(Appointment appointment)
+    {
+        _patient!.Appointments.Add(appointment);
+        await UpdateAsync();
+    }
+
+    public async Task EditAppointAsync(Appointment appointment)
+    {
+        var currentAppointment = _patient!.Appointments.First(x => x.Id == appointment.Id);
+        currentAppointment.Update(appointment);
+        await UpdateAsync();
+    }
+
+    public async Task RemoveAppointmentAsync(Appointment appointment)
+    {
+        _patient!.Appointments.Remove(appointment);
+        await UpdateAsync();
+    }
+
+    private async Task UpdateAsync()
+    {
+        try
+        {
+            await _container.ReplaceItemAsync(_patient, _patientId, _partitionKey);
+        }
+        catch (CosmosException e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
     }
 }
