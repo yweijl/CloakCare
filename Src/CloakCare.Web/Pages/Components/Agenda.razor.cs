@@ -1,12 +1,15 @@
 using System.Globalization;
 using CloakCare.Web.Data;
+using CloakCare.Web.Data.Models;
 using Microsoft.AspNetCore.Components;
 using MudBlazor;
 
 namespace CloakCare.Web.Pages.Components;
 
-public partial class Agenda : ComponentBase
+public partial class Agenda : ComponentBase, IDisposable
 {
+    private CancellationTokenSource? _cts;
+    
     [Inject]
     private IDialogService DialogService { get; set; } = default!;
 
@@ -20,16 +23,20 @@ public partial class Agenda : ComponentBase
     private List<Appointment> _appointments = new ();
     private TimeSpan? _editTime;
     private DateTime? _editDate;
+    private bool _loading;
 
     protected override async Task OnInitializedAsync()
     {
-        _appointments = (await DataService.GetAppointmentsAsync()).ToList();
+        _cts = new CancellationTokenSource();
+        _loading = true;
+        _appointments = (await DataService.GetAppointmentsAsync(_cts.Token)).ToList();
+        _loading = false;
     }
 
     private async Task RemoveAppointment(Appointment appointment)
     {
-        Snackbar.Add(appointment.Name);
-        _appointments.Remove(appointment);
+        await DataService.RemoveAppointmentAsync(appointment);
+        // _appointments.Remove(appointment);
         StateHasChanged();
     }
     
@@ -41,9 +48,15 @@ public partial class Agenda : ComponentBase
 
         if (!result.Canceled)
         {
-            _appointments.Add((Appointment)result.Data);
+            await DataService.AddAppointmentAsync((Appointment)result.Data);
+            // _appointments.Add((Appointment)result.Data);
+            StateHasChanged();
         }
+    }
 
+    private async Task EditAppointment()
+    {
+        
     }
 
     private void ClearEventLog()
@@ -101,6 +114,11 @@ public partial class Agenda : ComponentBase
         if ($"{appointment.DateTime} {appointment.Name} {appointment.Location} {appointment.Companion} ".Contains(_searchString))
             return true;
         return false;
+    }
+
+    public void Dispose()
+    {
+        _cts?.Dispose();
     }
 }
     
