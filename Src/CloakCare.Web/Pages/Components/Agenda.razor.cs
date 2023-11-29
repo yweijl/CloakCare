@@ -26,6 +26,7 @@ public partial class Agenda : ComponentBase, IDisposable
     private TimeSpan? _editTime;
     private DateTime? _editDate;
     private bool _loading;
+    private bool _isEditing;
     private Breakpoint _breakPoint;
 
     private MudDatePicker _datePicker = default!;
@@ -93,6 +94,7 @@ public partial class Agenda : ComponentBase, IDisposable
 
     private void BackupItem(object appointment)
     {
+        _isEditing = true;
         _editDate = ((Appointment)appointment).DateTime;
         _editTime = ((Appointment)appointment).DateTime.TimeOfDay;
 
@@ -112,6 +114,7 @@ public partial class Agenda : ComponentBase, IDisposable
         ((Appointment)appointment).DateTime = _editDate!.Value.Add(_editTime!.Value);
         await DataService.EditAppointAsync((Appointment)appointment);
         _loading = false;
+        _isEditing = false;
         StateHasChanged();
     }
 
@@ -122,6 +125,7 @@ public partial class Agenda : ComponentBase, IDisposable
         ((Appointment)appointment).Location = _appointmentBeforeEdit.Location;
         AddEditionEvent(
             $"RowEditCancel event: Editing of Appointment {((Appointment)appointment).Name} canceled");
+        _isEditing = false;
     }
 
     private bool FilterFunc(Appointment appointment)
@@ -143,17 +147,17 @@ public partial class Agenda : ComponentBase, IDisposable
 
         return false;
     }
-
-    public void Dispose()
-    {
-        _cts?.Dispose();
-    }
-
+    
     private async Task SetFocus(bool isDatePicker)
     {
         if (_breakPoint == Breakpoint.Xs)
         {
             await (isDatePicker ? _datePicker.BlurAsync() : _timePicker.BlurAsync());
         }
+    }
+
+    public void Dispose()
+    {
+        _cts?.Dispose();
     }
 }

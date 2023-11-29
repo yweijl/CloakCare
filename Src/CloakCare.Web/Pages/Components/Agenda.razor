@@ -4,14 +4,16 @@
 @using MudBlazor
 @inject ISnackbar Snackbar
 
-<div Class="pt-5">
-    <MudTable  Items="@_appointments" Dense="false" Hover="true" Loading="_loading" ReadOnly="false" CanCancelEdit="true" Filter="new Func<Appointment, bool>(FilterFunc)"
-              @bind-SelectedItem="_selectedItem" SortLabel="Sort By" CommitEditTooltip="Commit Edit"
+<div class="pt-5">
+    <MudTable Items="@_appointments" Dense="false" Hover="true" Loading="_loading" ReadOnly="false" CanCancelEdit="true" Filter="new Func<Appointment, bool>(FilterFunc)"
+              @bind-SelectedItem="_selectedItem" SortLabel="Sort By" CommitEditTooltip="Wijzig afspraak"
               RowEditPreview="BackupItem" RowEditCancel="ResetItemToOriginalValues"
               RowEditCommit="RowEditCommitted" IsEditRowSwitchingBlocked="true" ApplyButtonPosition="TableApplyButtonPosition.End" EditButtonPosition="TableEditButtonPosition.End" EditTrigger="TableEditTrigger.EditButton">
         <ToolBarContent>
             <MudText Typo="Typo.h6">Agenda</MudText>
-            <MudButton Class="ml-5" Variant="Variant.Filled" Size="Size.Small" EndIcon="@Icons.Material.Filled.Add" Color="Color.Primary" OnClick="@(AddAppointment)">Nieuw</MudButton>
+            <MudHidden Breakpoint="Breakpoint.Xs">
+                <MudButton Class="ml-5" Variant="Variant.Filled" Size="Size.Small" EndIcon="@Icons.Material.Filled.Add" Color="Color.Primary" OnClick="@(AddAppointment)">Nieuw</MudButton>
+            </MudHidden>
             <MudSpacer/>
             <MudTextField @bind-Value="_searchString" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
         </ToolBarContent>
@@ -49,8 +51,8 @@
         </RowTemplate>
         <RowEditingTemplate>
             <MudTd Class="d-flex flex-wrap" DataLabel="Datum">
-                <MudDatePicker @ref="_datePicker" @onfocus="@(() =>SetFocus(true))" DisableToolbar="true" Label="Datum" @bind-Date="_editDate" Editable="true" Required/>
-                <MudTimePicker @ref="_timePicker" @onfocus="@(() =>SetFocus(false))" DisableToolbar="true" Label="Tijd" @bind-Time="_editTime" Required/>
+                <MudDatePicker @ref="_datePicker" @onfocus="@(() => SetFocus(true))" DisableToolbar="true" Label="Datum" @bind-Date="_editDate" Editable="true" Required/>
+                <MudTimePicker @ref="_timePicker" @onfocus="@(() => SetFocus(false))" DisableToolbar="true" Label="Tijd" @bind-Time="_editTime" Required/>
             </MudTd>
             <MudTd DataLabel="Afspraak">
                 <MudTextField @bind-Value="@context.Name" Required/>
@@ -70,3 +72,8 @@
         </EditButtonContent>
     </MudTable>
 </div>
+<MudHidden Breakpoint="Breakpoint.SmAndUp">
+    <div Class="fixed fixed mr-10 mb-5 @(_isEditing ? "d-none" : "")" style="bottom: 0; right: 0">
+        <MudFab Color="Color.Primary" Size="Size.Small" StartIcon="@Icons.Material.Filled.Add" OnClick="@(AddAppointment)"/>
+    </div>
+</MudHidden>
