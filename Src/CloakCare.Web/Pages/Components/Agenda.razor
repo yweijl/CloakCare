@@ -10,7 +10,7 @@
               RowEditPreview="BackupItem" RowEditCancel="ResetItemToOriginalValues"
               RowEditCommit="RowEditCommitted" IsEditRowSwitchingBlocked="true" ApplyButtonPosition="TableApplyButtonPosition.End" EditButtonPosition="TableEditButtonPosition.End" EditTrigger="TableEditTrigger.EditButton">
         <ToolBarContent>
-            <MudText Typo="Typo.h6">Agenda</MudText>
+            <MudText Class="d-none d-sm-flex" Typo="Typo.h6">Agenda</MudText>
             <MudHidden Breakpoint="Breakpoint.Xs">
                 <MudButton Class="ml-5" Variant="Variant.Filled" Size="Size.Small" EndIcon="@Icons.Material.Filled.Add" Color="Color.Primary" OnClick="@(AddAppointment)">Nieuw</MudButton>
             </MudHidden>
@@ -18,7 +18,9 @@
             <MudTextField @bind-Value="_searchString" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
         </ToolBarContent>
         <ColGroup>
-            <col style="width: 180px"/>
+            <col/>
+            <col/>
+            <col/>
             <col/>
             <col/>
             <col/>
@@ -27,7 +29,10 @@
         </ColGroup>
         <HeaderContent>
             <MudTh>
-                <MudTableSortLabel InitialDirection="SortDirection.Ascending" SortBy="new Func<Appointment, object>(x => x.DateTime)">Datum</MudTableSortLabel>
+                <MudTableSortLabel InitialDirection="SortDirection.Ascending" SortBy="new Func<Appointment, object>(x => x.DateTime.Date)">Datum</MudTableSortLabel>
+            </MudTh>
+            <MudTh>
+                <MudTableSortLabel InitialDirection="SortDirection.Ascending" SortBy="new Func<Appointment, object>(x => x.DateTime.TimeOfDay)">Tijd</MudTableSortLabel>
             </MudTh>
             <MudTh>
                 <MudTableSortLabel SortBy="new Func<Appointment, object>(x => x.Name)">Afspraak</MudTableSortLabel>
@@ -38,20 +43,26 @@
             <MudTh>
                 <MudTableSortLabel SortBy="new Func<Appointment, object>(x => x.Companion)">Begeleider</MudTableSortLabel>
             </MudTh>
-            <MudTh></MudTh>
+            <MudTh>
+                <MudTableSortLabel SortBy="new Func<Appointment, object>(x => x.TaxiOrdered)">Taxi</MudTableSortLabel>
+            </MudTh>
         </HeaderContent>
         <RowTemplate>
-            <MudTd DataLabel="Datum">@context.DateTime</MudTd>
+            <MudTd DataLabel="Datum">@context.DateTime.Date.ToShortDateString()</MudTd>
+            <MudTd DataLabel="Tijd">@context.DateTime.TimeOfDay.ToString("hh\\:mm")</MudTd>
             <MudTd DataLabel="Afspraak">@context.Name</MudTd>
             <MudTd DataLabel="Locatie">@context.Location</MudTd>
             <MudTd DataLabel="Begeleider">@context.Companion</MudTd>
+            <MudTd DataLabel="Taxi"><MudSwitch @bind-Checked="@context.TaxiOrdered" ReadOnly="true" Color="Color.Info" /></MudTd>
             <MudTd>
                 <MudIconButton Size="Size.Small" Icon="@Icons.Material.Outlined.Delete" Class="pa-0" OnClick="@(() => RemoveAppointment(context))"/>
             </MudTd>
         </RowTemplate>
         <RowEditingTemplate>
-            <MudTd Class="d-flex flex-wrap" DataLabel="Datum">
+            <MudTd DataLabel="Datum">
                 <MudDatePicker @ref="_datePicker" @onfocus="@(() => SetFocus(true))" DisableToolbar="true" Label="Datum" @bind-Date="_editDate" Editable="true" Required/>
+            </MudTd>
+            <MudTd DataLabel="Tijd">
                 <MudTimePicker @ref="_timePicker" @onfocus="@(() => SetFocus(false))" DisableToolbar="true" Label="Tijd" @bind-Time="_editTime" Required/>
             </MudTd>
             <MudTd DataLabel="Afspraak">
@@ -62,6 +73,9 @@
             </MudTd>
             <MudTd DataLabel="Begeleider">
                 <MudTextField @bind-Value="@context.Companion"/>
+            </MudTd>
+            <MudTd DataLabel="Taxi">
+                <MudSwitch @bind-Checked="@context.TaxiOrdered" Color="Color.Info" />
             </MudTd>
         </RowEditingTemplate>
         <PagerContent>
@@ -74,6 +88,6 @@
 </div>
 <MudHidden Breakpoint="Breakpoint.SmAndUp">
     <div Class="fixed fixed mr-10 mb-5 @(_isEditing ? "d-none" : "")" style="bottom: 0; right: 0">
-        <MudFab Color="Color.Primary" Size="Size.Small" StartIcon="@Icons.Material.Filled.Add" OnClick="@(AddAppointment)"/>
+        <MudFab Color="Color.Primary" Size="Size.Medium" StartIcon="@Icons.Material.Filled.Add" OnClick="@(AddAppointment)"/>
     </div>
 </MudHidden>

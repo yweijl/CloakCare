@@ -31,12 +31,13 @@ public partial class Agenda : ComponentBase, IDisposable
 
     private MudDatePicker _datePicker = default!;
     private MudTimePicker _timePicker = default!;
-    
+
     protected override async Task OnInitializedAsync()
     {
         _cts = new CancellationTokenSource();
         _loading = true;
-        _appointments = (await DataService.GetAppointmentsAsync(_cts.Token)).ToList();
+        _appointments = (await DataService.GetAppointmentsAsync(_cts.Token))
+            .Where(x => x.DateTime >= DateTime.Now).ToList();
         _loading = false;
     }
 
@@ -49,15 +50,15 @@ public partial class Agenda : ComponentBase, IDisposable
     private async Task RemoveAppointment(Appointment appointment)
     {
         var toDelete = await DialogService.ShowMessageBox(
-            "Afspraak verwijderen", 
-            "Weet je zeker dat je de afspraak wilt verwijderen?", 
-            yesText:"Ja", cancelText:"Nee");
+            "Afspraak verwijderen",
+            "Weet je zeker dat je de afspraak wilt verwijderen?",
+            yesText: "Ja", cancelText: "Nee");
 
         if (!toDelete ?? true)
         {
             return;
         }
-        
+
         _loading = true;
         await DataService.RemoveAppointmentAsync(appointment);
         _appointments.Remove(appointment);
@@ -95,15 +96,8 @@ public partial class Agenda : ComponentBase, IDisposable
     private void BackupItem(object appointment)
     {
         _isEditing = true;
-        _editDate = ((Appointment)appointment).DateTime;
-        _editTime = ((Appointment)appointment).DateTime.TimeOfDay;
+        _appointmentBeforeEdit = new Appointment((Appointment)appointment);
 
-        _appointmentBeforeEdit = new Appointment
-        {
-            DateTime = ((Appointment)appointment).DateTime,
-            Name = ((Appointment)appointment).Name,
-            Location = ((Appointment)appointment).Location
-        };
         AddEditionEvent(
             $"RowEditPreview event: made a backup of Appointment {((Appointment)appointment).Name}");
     }
@@ -120,9 +114,7 @@ public partial class Agenda : ComponentBase, IDisposable
 
     private void ResetItemToOriginalValues(object appointment)
     {
-        ((Appointment)appointment).DateTime = _appointmentBeforeEdit.DateTime;
-        ((Appointment)appointment).Name = _appointmentBeforeEdit.Name;
-        ((Appointment)appointment).Location = _appointmentBeforeEdit.Location;
+        ((Appointment)appointment).Update(_appointmentBeforeEdit);
         AddEditionEvent(
             $"RowEditCancel event: Editing of Appointment {((Appointment)appointment).Name} canceled");
         _isEditing = false;
@@ -132,7 +124,10 @@ public partial class Agenda : ComponentBase, IDisposable
     {
         if (string.IsNullOrWhiteSpace(_searchString))
             return true;
-        if (appointment.DateTime.ToString(CultureInfo.InvariantCulture)
+        if (appointment.DateTime.Date.ToString(CultureInfo.InvariantCulture)
+            .Contains(_searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        if (appointment.DateTime.TimeOfDay.ToString()
             .Contains(_searchString, StringComparison.OrdinalIgnoreCase))
             return true;
         if (appointment.Name.Contains(_searchString, StringComparison.OrdinalIgnoreCase))
@@ -141,13 +136,13 @@ public partial class Agenda : ComponentBase, IDisposable
             return true;
         if (appointment.Companion.Contains(_searchString, StringComparison.OrdinalIgnoreCase))
             return true;
-        if ($"{appointment.DateTime} {appointment.Name} {appointment.Location} {appointment.Companion} "
+        if ($"{appointment.DateTime.Date} {appointment.DateTime.TimeOfDay} {appointment.Name} {appointment.Location} {appointment.Companion} "
             .Contains(_searchString))
             return true;
 
         return false;
     }
-    
+
     private async Task SetFocus(bool isDatePicker)
     {
         if (_breakPoint == Breakpoint.Xs)

@@ -15,6 +15,7 @@
                                   @bind-Value="Model.Location" For="@(() => Model.Location)" />
                     <MudTextField Label="Begeleider" Class="mt-3"
                                   @bind-Value="Model.Companion" For="@(() => Model.Companion)"/>
+                    <MudSwitch @bind-Checked="Model.TaxiOrdered" Label="Taxi" LabelPosition="LabelPosition.Start" Color="Color.Info" For="@(() => Model.TaxiOrdered)" />
                 </MudCardContent>
                 <MudCardActions Class="d-flex justify-end">
                     <MudButton OnClick="Cancel">Annuleer</MudButton>
@@ -71,7 +72,8 @@
         public string? Name { get; set; }
         [Required(ErrorMessage = "Geef een locatie op")]
         public string? Location { get; set; }
-        public string? Companion { get; set; }
+        public string? Companion { get; set; } = string.Empty;
+        public bool TaxiOrdered { get; set; }
 
         public Appointment ToAppointment()
         {
@@ -82,6 +84,7 @@
                 Name = Name!,
                 Location = Location!,
                 Companion = Companion!,
+                TaxiOrdered = TaxiOrdered,
             };
         }
     }
