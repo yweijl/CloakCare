@@ -1,20 +1,23 @@
 using Azure.Identity;
 using CloakCare.Web.Data.Models;
 using Microsoft.Azure.Cosmos;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
 
 namespace CloakCare.Web.Data;
 
 public class DataService
 {
+    private readonly IMemoryCache _cache;
     private readonly ILogger<DataService> _logger;
     private readonly Container _container;
     private readonly string _patientId;
     private Patient? _patient;
 
-    public DataService(IOptions<CosmosSettings> settings, ILogger<DataService> logger)
+    public DataService(IOptions<CosmosSettings> settings, ILogger<DataService> logger, IMemoryCache cache)
     {
         _logger = logger;
+        _cache = cache;
         var client = new CosmosClient(settings.Value.Endpoint, new DefaultAzureCredential(),
             new CosmosClientOptions()
             {
@@ -30,12 +33,18 @@ public class DataService
 
     public async Task<List<Appointment>> GetAppointmentsAsync(CancellationToken cancellationToken)
     {
-        var result =
-            await _container.ReadItemAsync<Patient>(_patientId, new PartitionKey(_patientId),
-                cancellationToken: cancellationToken);
+        _patient = await _cache.GetOrCreateAsync<Patient>(_patientId, async entry =>
+        {
+            entry.SetSlidingExpiration(TimeSpan.FromMinutes(1));
+            entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(2);
+            var result =
+                await _container.ReadItemAsync<Patient>(_patientId, new PartitionKey(_patientId),
+                    cancellationToken: cancellationToken);
+            return result.Resource;
 
-        _patient = result.Resource;
-        return _patient.Appointments;
+        });
+        
+        return _patient!.Appointments;
     }
 
     public async Task AddAppointmentAsync(Appointment appointment)
@@ -61,7 +70,8 @@ public class DataService
     {
         try
         {
-            await _container.ReplaceItemAsync(_patient, _patientId);
+            var result = await _container.ReplaceItemAsync(_patient, _patientId);
+            _cache.Set(_patientId, result.Resource!);
         }
         catch (CosmosException e)
         {

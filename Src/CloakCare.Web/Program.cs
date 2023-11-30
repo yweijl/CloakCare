@@ -1,5 +1,3 @@
-using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Web;
 using CloakCare.Web.Data;
 using MudBlazor.Services;
 
@@ -9,8 +7,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 builder.Services.AddMudServices();
-
-builder.Services.AddScoped<DataService>();
+builder.Services.AddMemoryCache();
+builder.Services.AddSingleton<DataService>();
 
 builder.Services.Configure<CosmosSettings>(
     builder.Configuration.GetSection(nameof(CosmosSettings)));

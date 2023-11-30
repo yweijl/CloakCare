@@ -95,6 +95,8 @@ public partial class Agenda : ComponentBase, IDisposable
     private void BackupItem(object appointment)
     {
         _isEditing = true;
+        _editDate = ((Appointment)appointment).DateTime;
+        _editTime = ((Appointment)appointment).DateTime.TimeOfDay;
         _appointmentBeforeEdit = new Appointment((Appointment)appointment);
 
         AddEditionEvent(
