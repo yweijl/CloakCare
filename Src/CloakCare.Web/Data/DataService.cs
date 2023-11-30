@@ -35,8 +35,8 @@ public class DataService
     {
         _patient = await _cache.GetOrCreateAsync<Patient>(_patientId, async entry =>
         {
-            entry.SetSlidingExpiration(TimeSpan.FromMinutes(1));
-            entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(2);
+            entry.SetSlidingExpiration(TimeSpan.FromHours(5));
+            entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(10);
             var result =
                 await _container.ReadItemAsync<Patient>(_patientId, new PartitionKey(_patientId),
                     cancellationToken: cancellationToken);

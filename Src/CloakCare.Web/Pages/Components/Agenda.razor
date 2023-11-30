@@ -1,8 +1,4 @@
-@using System.Net.Http.Json
-@using CloakCare.Web.Data
 @using CloakCare.Web.Data.Models
-@using MudBlazor
-@inject ISnackbar Snackbar
 
 <div class="pt-5">
     <MudTable Items="@_appointments" Dense="false" Hover="true" Loading="_loading" ReadOnly="false" CanCancelEdit="true" Filter="new Func<Appointment, bool>(FilterFunc)"
@@ -68,10 +64,10 @@
         </RowTemplate>
         <RowEditingTemplate>
             <MudTd DataLabel="Datum">
-                <MudDatePicker @ref="_datePicker" @onfocus="@(() => SetFocus(true))" DisableToolbar="true" Label="Datum" @bind-Date="_editDate" Editable="true" Required/>
+                <MudDatePicker @ref="_datePicker" DisableToolbar="true" Label="Datum" @bind-Date="_editDate" Editable="true" Required/>
             </MudTd>
             <MudTd DataLabel="Tijd">
-                <MudTimePicker @ref="_timePicker" @onfocus="@(() => SetFocus(false))" DisableToolbar="true" Label="Tijd" @bind-Time="_editTime" Required/>
+                <MudTimePicker @ref="_timePicker" DisableToolbar="true" Label="Tijd" @bind-Time="_editTime" Required/>
             </MudTd>
             <MudTd DataLabel="Afspraak">
                 <MudTextField @bind-Value="@context.Name" Required/>
@@ -85,6 +81,8 @@
             <MudTd DataLabel="Taxi">
                 <MudSwitch @bind-Checked="@context.TaxiOrdered" Color="Color.Info"/>
             </MudTd>
+            <MudTd></MudTd>
+            <MudTd></MudTd>
         </RowEditingTemplate>
         <PagerContent>
             <MudTablePager/>
@@ -94,8 +92,3 @@
         </EditButtonContent>
     </MudTable>
 </div>
-<MudHidden Breakpoint="Breakpoint.SmAndUp">
-    <div Class="fixed fixed mr-10 mb-5 @(_isEditing ? "d-none" : "")" style="bottom: 0; right: 0">
-        <MudFab Color="Color.Primary" Size="Size.Medium" StartIcon="@Icons.Material.Filled.Add" OnClick="@(AddAppointment)"/>
-    </div>
-</MudHidden>

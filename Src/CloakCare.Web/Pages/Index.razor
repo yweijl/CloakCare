@@ -2,5 +2,9 @@
 @using CloakCare.Web.Pages.Components;
 
 <PageTitle>Afspraken</PageTitle>
-
-<Agenda/>
+<MudHidden Breakpoint="Breakpoint.SmAndUp">
+    <MobileAgenda/>
+</MudHidden>
+<MudHidden Breakpoint="Breakpoint.Xs">
+    <Agenda/>
+</MudHidden>

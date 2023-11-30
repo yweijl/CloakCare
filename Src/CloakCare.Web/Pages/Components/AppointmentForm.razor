@@ -40,11 +40,25 @@
     
     [Inject] private IBrowserViewportService BreakpointListener { get; set; } = default!;
     
+    [Parameter] public Appointment? EditAppointment { get; set; }
+    
     private MudDatePicker _datePicker = default!;
     private MudTimePicker _timePicker = default!;
     private Breakpoint _breakPoint;
 
-    private AppointmentForm Model { get; set; } = new();
+    private FormModel Model { get; set; } = new();
+
+    protected override void OnInitialized()
+    {
+        if (EditAppointment == null) return;
+
+        Model.Date = EditAppointment.DateTime;
+        Model.Time = EditAppointment.DateTime.TimeOfDay;
+        Model.Name = EditAppointment.Name;
+        Model.Location = EditAppointment.Location;
+        Model.TaxiOrdered = EditAppointment.TaxiOrdered;
+        Model.Companion = EditAppointment.Companion;
+    }
 
     private void OnValidSubmit(EditContext context)
     {
@@ -59,10 +73,9 @@
         }
     }
 
-
     void Cancel() => MudDialog.Cancel();
     
-    private class AppointmentForm
+    private class FormModel
     {
         [Required(ErrorMessage = "Geef een datum op")]
         public DateTime? Date { get; set; }

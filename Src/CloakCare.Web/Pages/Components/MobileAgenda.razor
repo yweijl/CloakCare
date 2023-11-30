@@ -1,0 +1,42 @@
+<MudContainer Class="pt-5">
+    @foreach (var appointment in _appointments)
+    {
+        <MudCard Elevation="3" Class="mb-3">
+            <MudCardContent>
+                <span class="d-flex align-end justify-space-between">
+                    <MudText>@appointment.Name</MudText>
+                    <MudText Typo="Typo.caption">@appointment.DateTime.ToString("g")</MudText>
+                </span>
+                <MudDivider/>
+                <span class="d-flex align-end mt-2">
+                    <MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.LocationOn"/>
+                    <MudText Typo="Typo.body2" Class="">@appointment.Location</MudText>
+                </span>
+                <span class="d-flex align-end mt-2">
+                    <MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.Person"/>
+                    <MudText Typo="Typo.body2">@(string.IsNullOrWhiteSpace(appointment.Companion) ? "..." : appointment.Companion)</MudText>
+                </span>
+                <span class="d-flex align-end mt-2">
+                    <MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.LocalTaxi"/>
+                    <MudText Typo="Typo.body2">@(appointment.TaxiOrdered ? "Taxi besteld" : "...")</MudText>
+                </span>
+
+            </MudCardContent>
+            <MudCardActions Class="d-flex justify-space-between">
+                <span>
+                    <MudButton Size="@Size.Small" StartIcon="@Icons.Material.Outlined.Download" OnClick="@(() => DownloadIcs(appointment))">
+                        <MudText Typo="Typo.caption">download afspraak</MudText>
+                    </MudButton>
+
+                </span>
+                <span>
+                    <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.Edit" OnClick="@(() => EditAppointment(appointment))"/>
+                    <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.DeleteForever" OnClick="@(() => RemoveAppointment(appointment))"/>
+                </span>
+            </MudCardActions>
+        </MudCard>
+    }
+</MudContainer>
+<div Class="fixed fixed mr-10 mb-5 @(_isEditing ? "d-none" : "")" style="bottom: 0; right: 0">
+    <MudFab Color="Color.Primary" Size="Size.Medium" StartIcon="@Icons.Material.Filled.Add" OnClick="@AddAppointment"/>
+</div>
