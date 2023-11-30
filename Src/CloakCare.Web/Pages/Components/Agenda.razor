@@ -26,6 +26,7 @@
             <col/>
             <col/>
             <col/>
+            <col/>
         </ColGroup>
         <HeaderContent>
             <MudTh>
@@ -46,6 +47,8 @@
             <MudTh>
                 <MudTableSortLabel SortBy="new Func<Appointment, object>(x => x.TaxiOrdered)">Taxi</MudTableSortLabel>
             </MudTh>
+            <MudTd></MudTd>
+            <MudTd></MudTd>
         </HeaderContent>
         <RowTemplate>
             <MudTd DataLabel="Datum">@context.DateTime.Date.ToShortDateString()</MudTd>
@@ -53,9 +56,14 @@
             <MudTd DataLabel="Afspraak">@context.Name</MudTd>
             <MudTd DataLabel="Locatie">@context.Location</MudTd>
             <MudTd DataLabel="Begeleider">@context.Companion</MudTd>
-            <MudTd DataLabel="Taxi"><MudSwitch @bind-Checked="@context.TaxiOrdered" ReadOnly="true" Color="Color.Info" /></MudTd>
+            <MudTd DataLabel="Taxi">
+                <MudSwitch @bind-Checked="@context.TaxiOrdered" ReadOnly="true" Color="Color.Info"/>
+            </MudTd>
             <MudTd>
                 <MudIconButton Size="Size.Small" Icon="@Icons.Material.Outlined.Delete" Class="pa-0" OnClick="@(() => RemoveAppointment(context))"/>
+            </MudTd>
+            <MudTd>
+                <MudIconButton Size="Size.Small" Icon="@Icons.Material.Outlined.Download" Class="pa-0" OnClick="@(() => DownloadIcs(context))"/>
             </MudTd>
         </RowTemplate>
         <RowEditingTemplate>
@@ -75,7 +83,7 @@
                 <MudTextField @bind-Value="@context.Companion"/>
             </MudTd>
             <MudTd DataLabel="Taxi">
-                <MudSwitch @bind-Checked="@context.TaxiOrdered" Color="Color.Info" />
+                <MudSwitch @bind-Checked="@context.TaxiOrdered" Color="Color.Info"/>
             </MudTd>
         </RowEditingTemplate>
         <PagerContent>

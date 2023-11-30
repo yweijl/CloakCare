@@ -2,6 +2,7 @@ using System.Globalization;
 using CloakCare.Web.Data;
 using CloakCare.Web.Data.Models;
 using Microsoft.AspNetCore.Components;
+using Microsoft.JSInterop;
 using MudBlazor;
 using MudBlazor.Services;
 
@@ -12,11 +13,9 @@ public partial class Agenda : ComponentBase, IDisposable
     private CancellationTokenSource? _cts;
 
     [Inject] private IDialogService DialogService { get; set; } = default!;
-
     [Inject] private DataService DataService { get; set; } = default!;
-
     [Inject] private IBrowserViewportService BreakpointListener { get; set; } = default!;
-
+    [Inject] private IJSRuntime Js { get; set; } = default!;
 
     private List<string> _editEvents = new();
     private string _searchString = "";
@@ -154,5 +153,15 @@ public partial class Agenda : ComponentBase, IDisposable
     public void Dispose()
     {
         _cts?.Dispose();
+    }
+
+    private async Task DownloadIcs(Appointment appointment)
+    {
+        var icsStream = appointment.CreateIcsStream();
+        var fileName = $"{appointment.Name}.ics";
+
+        using var streamRef = new DotNetStreamReference(stream: icsStream);
+
+        await Js.InvokeVoidAsync("downloadFileFromStream", fileName, streamRef);
     }
 }
