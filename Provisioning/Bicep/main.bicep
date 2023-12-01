@@ -10,10 +10,7 @@ param aspSku string
 param containerName string
 param patientId string
 
-var resourceGroup = az.resourceGroup('${name}-rg')
-
 module appServicePlan 'Modules/appServicePlan.bicep' = {
-  scope: resourceGroup
   name: '${name}-asp'
   params: {
     aspKind: aspKind
@@ -25,40 +22,20 @@ module appServicePlan 'Modules/appServicePlan.bicep' = {
 }
 
 module appService 'Modules/appService.bicep' = {
-  scope: resourceGroup
   name: '${name}-as'
   params: {
     asName: '${name}-as'
     location: location
     serverFarmId: appServicePlan.outputs.id
+    dbName: '${name}-db'
+    containerName: containerName
+    patientId: patientId
+    environment: environment
     tags: tags
-    appsettings: [
-      {
-        name: 'ASPNETCORE_ENVIRONMENT'
-        value: environment
-      }
-      {
-        name: 'CosmosSettings__DbName'
-        value: '${name}-db'
-      }
-      {
-        name: 'CosmosSettings__Endpoint'
-        value: 'https://${name}-db.documents.azure.com:443/'
-      }
-      {
-        name: 'CosmosSettings__Container'
-        value: containerName
-      }
-      {
-        name: 'CosmosSettings__PatientId'
-        value: patientId
-      }
-    ]
   }
 }
 
 module cosmosDb 'Modules/cosmos.bicep' = {
-  scope: resourceGroup
   name: '${name}-db'
   params: {
     dbName: '${name}-db'
